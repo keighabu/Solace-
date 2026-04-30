@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Solace | Your Gentle Space</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="landing-body">
+
+  <img src="logo.png" alt="Solace Logo" class="logo">
+  <p class="tagline">Your Gentle Space</p>
+
+  <div class="glass-card">
+    <h2>Welcome to Solace</h2>
+    <p class="description">A gentle space to breathe, reflect, and grow.</p>
+    <p id="current-date" class="date-display"></p>
+    <p class="question">Let's begin with your name.</p>
+    <br>
+    <input type="text" id="user-name-input" placeholder="Enter your name...">
+    <br><br>
+    <button class="start-btn" onclick="startJourney()">Start Journey</button>
+  </div>
+
+  <a href="support.html" class="floating-help-circle" title="Get Support">
+    <span class="material-symbols-outlined">call</span>
+  </a>
+
+  <script>
+    // Show current date
+    (function() {
+      const el = document.getElementById('current-date');
+      if (el) {
+        el.innerText = new Date().toLocaleDateString('en-PH', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+      }
+    })();
+
+    function startJourney() {
+      const name = document.getElementById('user-name-input').value.trim();
+      if (!name) {
+        alert("Please enter your name to begin your journey.");
+        return;
+      }
+      localStorage.setItem('user_name', name);
+      window.location.href = 'dashboard.html';
+    }
+
+    // Allow Enter key to submit
+    document.getElementById('user-name-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') startJourney();
+    });
+  </script>
+</body>
+</html>

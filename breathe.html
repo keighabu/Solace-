@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Solace | Breathe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="bottomnav.css">
+</head>
+<body class="breathe-page-body">
+
+  <div class="breathe-container">
+
+    <nav class="top-nav">
+      <a href="dashboard.html" class="back-btn">← Back</a>
+    </nav>
+
+    <header class="breathe-header">
+      <h1>Take a moment to breathe 🌿</h1>
+      <p>A guided 4-4-4 breathing exercise</p>
+    </header>
+
+    <main class="breathing-card">
+      <div class="heart-wrapper">
+        <div id="breathingHeart" class="heart-animate">
+          <svg class="heart-svg" viewBox="48 30 204 198" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="heartGrad" cx="38%" cy="32%" r="60%">
+                <stop offset="0%" stop-color="#daeee3"/>
+                <stop offset="40%" stop-color="#B2C8BA"/>
+                <stop offset="100%" stop-color="#6a9a7a"/>
+              </radialGradient>
+              <radialGradient id="shineGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="white" stop-opacity="0.7"/>
+                <stop offset="100%" stop-color="white" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <path d="M150,228 C150,228 48,160 48,88 C48,53 70,30 100,30 C118,30 134,40 150,58 C166,40 182,30 200,30 C230,30 252,53 252,88 C252,160 150,228 150,228 Z" fill="url(#heartGrad)"/>
+            <path d="M150,228 C150,228 48,160 48,88 C48,53 70,30 100,30 C118,30 134,40 150,58 C166,40 182,30 200,30 C230,30 252,53 252,88 C252,160 150,228 150,228 Z" fill="none" stroke="#5a8a6a" stroke-width="1" opacity="0.4"/>
+            <path d="M100,45 C112,38 126,40 138,50 C143,44 147,39 150,36 C153,39 157,44 162,50 C174,40 188,38 200,45 C182,30 166,40 150,58 C134,40 118,30 100,30 C70,30 48,53 48,88 C48,66 65,46 100,45 Z" fill="white" opacity="0.18"/>
+            <ellipse cx="112" cy="64" rx="20" ry="13" fill="url(#shineGrad)" opacity="0.7" transform="rotate(-25,112,64)"/>
+            <path d="M75,76 C72,93 70,113 76,136" fill="none" stroke="#6a9a7a" stroke-width="2.5" stroke-linecap="round" opacity="0.3"/>
+            <path d="M103,44 C111,40 120,39 129,43" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.45"/>
+          </svg>
+        </div>
+      </div>
+
+      <h2 id="instruction-text">Ready when you are</h2>
+      <button id="startBreathe" class="begin-btn">▶ Begin</button>
+    </main>
+
+  </div>
+
+  <script>
+    const heart = document.getElementById('breathingHeart');
+    const btn   = document.getElementById('startBreathe');
+    const text  = document.getElementById('instruction-text');
+
+    const phases = [
+      { label: 'Inhale...', duration: 4000 },
+      { label: 'Hold...',   duration: 4000 },
+      { label: 'Exhale...', duration: 4000 },
+    ];
+
+    let running = false, phaseIndex = 0, timer = null;
+
+    function runPhase() {
+      text.textContent = phases[phaseIndex].label;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        phaseIndex = (phaseIndex + 1) % phases.length;
+        runPhase();
+      }, phases[phaseIndex].duration);
+    }
+
+    btn.addEventListener('click', () => {
+      if (!running) {
+        running = true;
+        btn.textContent = 'Stop';
+        heart.classList.add('heart-active');
+        phaseIndex = 0;
+        runPhase();
+      } else {
+        running = false;
+        btn.textContent = '▶ Begin';
+        heart.classList.remove('heart-active');
+        text.textContent = 'Ready when you are';
+        clearTimeout(timer);
+      }
+    });
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>

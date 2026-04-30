@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Solace | Journal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="bottomnav.css">
+</head>
+<body class="journal-body">
+
+  <div class="progress-page-container">
+    <div class="glass-card journal-card">
+
+      <a href="dashboard.html" class="back-link-journal">
+        <span class="back-arrow">←</span> Dashboard
+      </a>
+
+      <header class="journal-header">
+        <h1>Write your <i>thoughts</i> 🤍</h1>
+        <p class="description">Let it all out — your words are safe here.</p>
+      </header>
+
+      <div class="reflection-box">
+        <label>Today I feel...</label>
+        <textarea id="journal-input" placeholder="Today I feel..."></textarea>
+      </div>
+
+      <button class="save-btn" id="saveJournal">💾 Save Entry</button>
+
+    </div>
+  </div>
+
+  <!-- Recent Entries -->
+  <div class="recent-entries-section">
+    <h3>Recent Entries</h3>
+    <div id="entriesList"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const journalInput = document.getElementById('journal-input');
+      const saveBtn = document.getElementById('saveJournal');
+      let editingIndex = null;
+
+      function renderEntries() {
+        const entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+        const list = document.getElementById('entriesList');
+
+        if (entries.length === 0) {
+          list.innerHTML = '<p style="color:#aaa;text-align:center;font-style:italic;padding:20px 0;">No entries yet. Write your first one above ✨</p>';
+          return;
+        }
+
+        list.innerHTML = entries.map((entry, index) => `
+          <div class="entry-card">
+            <div class="entry-header">
+              <span class="entry-date">${new Date(entry.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+              <div class="entry-actions">
+                <button class="action-btn" onclick="editEntry(${index})" title="Edit">✏️</button>
+                <button class="action-btn" onclick="deleteEntry(${index})" title="Delete">🗑️</button>
+              </div>
+            </div>
+            <p class="entry-text">${entry.content.replace(/\n/g, '<br>')}</p>
+          </div>
+        `).join('');
+      }
+
+      window.deleteEntry = (index) => {
+        if (confirm("Delete this entry?")) {
+          let entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+          entries.splice(index, 1);
+          localStorage.setItem('journalEntries', JSON.stringify(entries));
+          renderEntries();
+        }
+      };
+
+      window.editEntry = (index) => {
+        let entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+        journalInput.value = entries[index].content;
+        editingIndex = index;
+        saveBtn.innerHTML = '📝 Update Entry';
+        journalInput.focus();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      saveBtn.addEventListener('click', () => {
+        const content = journalInput.value.trim();
+        if (!content) return;
+
+        let entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+
+        if (editingIndex !== null) {
+          entries[editingIndex].content = content;
+          editingIndex = null;
+          saveBtn.innerHTML = '💾 Save Entry';
+        } else {
+          entries.unshift({ date: new Date().toISOString(), content });
+        }
+
+        localStorage.setItem('journalEntries', JSON.stringify(entries));
+        journalInput.value = '';
+        renderEntries();
+      });
+
+      renderEntries();
+    });
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>
