@@ -983,7 +983,11 @@ br,
 
 .journal-header h1 i { color: var(--sage); }
 
-
+.save-btn {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 /* ── Recent Entries & Mood History ── */
 .recent-entries-section {
