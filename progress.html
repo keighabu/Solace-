@@ -403,24 +403,6 @@ Object.keys(counts).forEach(dayIndex => {
   </script>
 
   <script src="script.js"></script>
-  <script>
-    function makeBubble() {
-      const b = document.createElement('div');
-      b.className = 'bubble';
-      const size = Math.random() * 60 + 15;
-      const duration = Math.random() * 12 + 8;
-      const colorDur = Math.random() * 8 + 6;
-      b.style.width = size + 'px';
-      b.style.height = size + 'px';
-      b.style.left = (Math.random() * 100) + '%';
-      b.style.bottom = '-' + size + 'px';
-      b.style.animationDuration = duration + 's, ' + colorDur + 's';
-      b.style.animationDelay = (Math.random() * 3) + 's, 0s';
-      document.body.appendChild(b);
-      setTimeout(() => b.remove(), (duration + 4) * 1000);
-    }
-    for (let i = 0; i < 15; i++) setTimeout(makeBubble, i * 400);
-    setInterval(makeBubble, 1200);
-  </script>
+ 
 </body>
 </html>
