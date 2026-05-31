@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Solace | Breathe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="bottomnav.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .breathe-page-body {
+      background-image: url('BG5.png');
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      background-position: center;
+
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      /* push centre point up slightly to account for bottom nav */
+      padding-bottom: var(--nav-height, 70px);
+    }
+
+    .breathing-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12));
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.55);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(138,163,138,0.15);
+
+      width: min(90%, 420px);
+      padding: 20px 24px 18px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0;
+    }
+
+    /* Title lives inside the card now */
+    .breathe-header {
+      margin-bottom: 10px;
+    }
+    .breathe-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.15rem, 2.8vw, 1.55rem);
+      color: #4a5a4a;
+      line-height: 1.25;
+      margin-bottom: 3px;
+    }
+    .breathe-header p {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.78rem;
+      color: #7a8a7a;
+    }
+
+    .heart-wrapper {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .breathing-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%) scale(1);
+      width: 138px; height: 138px;
+      border-radius: 50%;
+      border: 3px solid rgba(138,163,138,0.4);
+      box-shadow: 0 0 0 6px rgba(138,163,138,0.1), 0 0 20px rgba(138,163,138,0.2);
+      transition: transform 4s ease-in-out, border-color 4s ease-in-out, box-shadow 4s ease-in-out;
+      pointer-events: none;
+    }
+
+    .breathing-ring-2 {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%) scale(1);
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(138,163,138,0.2);
+      transition: transform 4s ease-in-out, opacity 4s ease-in-out;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .ring-inhale   { transform: translate(-50%,-50%) scale(1.35) !important; border-color: rgba(85,239,196,0.7) !important; box-shadow: 0 0 0 8px rgba(85,239,196,0.1), 0 0 35px rgba(85,239,196,0.3) !important; }
+    .ring-2-inhale { transform: translate(-50%,-50%) scale(1.55) !important; opacity: 0.15 !important; }
+    .ring-hold     { transform: translate(-50%,-50%) scale(1.35) !important; border-color: rgba(116,185,255,0.7) !important; box-shadow: 0 0 0 8px rgba(116,185,255,0.1), 0 0 35px rgba(116,185,255,0.3) !important; }
+    .ring-2-hold   { transform: translate(-50%,-50%) scale(1.55) !important; opacity: 0.15 !important; }
+    .ring-exhale   { transform: translate(-50%,-50%) scale(1) !important; border-color: rgba(138,163,138,0.4) !important; box-shadow: 0 0 0 6px rgba(138,163,138,0.1), 0 0 20px rgba(138,163,138,0.2) !important; }
+    .ring-2-exhale { transform: translate(-50%,-50%) scale(1) !important; opacity: 0.5 !important; }
+
+    .heart-animate {
+      position: relative;
+      z-index: 2;
+      width: 95px; height: 95px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform-origin: 50% 50%;
+    }
+
+    #instruction-text {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+      color: #2e2e2e;
+      margin: 0 0 2px 0;
+      min-height: 22px;
+      transition: color 1s ease;
+    }
+    .phase-inhale { color: #00B894; }
+    .phase-hold   { color: #0984E3; }
+    .phase-exhale { color: #8AA38A; }
+
+    .countdown {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #8AA38A;
+      letter-spacing: 2px;
+      min-height: 20px;
+      margin-bottom: 2px;
+      transition: color 1s ease;
+    }
+
+    .begin-btn {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #fff;
+      background-color: #8AA38A;
+      border: none;
+      border-radius: 50px;
+      padding: 9px 28px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 12px rgba(138,163,138,0.3);
+    }
+    .begin-btn:hover {
+      background-color: #6a8a6a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(138,163,138,0.4);
+    }
+
+    .sound-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.68rem;
+      color: #8AA38A;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 10px 0 5px;
+    }
+
+    .sound-controls {
+      display: flex;
+      gap: 7px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .sound-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 50px;
+      border: 1.5px solid rgba(138,163,138,0.4);
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(8px);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #4a5a4a;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .sound-btn:hover  { background: rgba(138,163,138,0.15); border-color: #8AA38A; }
+    .sound-btn.active { background: rgba(138,163,138,0.25); border-color: #8AA38A; color: #2F3E2F; box-shadow: 0 3px 10px rgba(138,163,138,0.3); }
+  </style>
+</head>
+<body class="breathe-page-body">
+
+  <main class="breathing-card">
+
+    <!-- Title now inside the card -->
+    <div class="breathe-header">
+      <h1>Take a moment to breathe 🤗</h1>
+      <p>A guided 4-4-4 breathing exercise</p>
+    </div>
+
+    <div class="heart-wrapper">
+      <div class="breathing-ring-2" id="breathingRing2"></div>
+      <div class="breathing-ring"   id="breathingRing"></div>
+      <div id="breathingHeart" class="heart-animate">
+        <svg class="heart-svg" viewBox="48 30 204 198" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+          <defs>
+            <radialGradient id="heartGrad" cx="38%" cy="32%" r="60%">
+              <stop offset="0%"   stop-color="#daeee3"/>
+              <stop offset="40%"  stop-color="#B2C8BA"/>
+              <stop offset="100%" stop-color="#6a9a7a"/>
+            </radialGradient>
+            <radialGradient id="shineGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"   stop-color="white" stop-opacity="0.7"/>
+              <stop offset="100%" stop-color="white" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <path d="M150,228 C150,228 48,160 48,88 C48,53 70,30 100,30 C118,30 134,40 150,58 C166,40 182,30 200,30 C230,30 252,53 252,88 C252,160 150,228 150,228 Z" fill="url(#heartGrad)"/>
+          <path d="M150,228 C150,228 48,160 48,88 C48,53 70,30 100,30 C118,30 134,40 150,58 C166,40 182,30 200,30 C230,30 252,53 252,88 C252,160 150,228 150,228 Z" fill="none" stroke="#5a8a6a" stroke-width="1" opacity="0.4"/>
+          <path d="M100,45 C112,38 126,40 138,50 C143,44 147,39 150,36 C153,39 157,44 162,50 C174,40 188,38 200,45 C182,30 166,40 150,58 C134,40 118,30 100,30 C70,30 48,53 48,88 C48,66 65,46 100,45 Z" fill="white" opacity="0.18"/>
+          <ellipse cx="112" cy="64" rx="20" ry="13" fill="url(#shineGrad)" opacity="0.7" transform="rotate(-25,112,64)"/>
+          <path d="M75,76 C72,93 70,113 76,136" fill="none" stroke="#6a9a7a" stroke-width="2.5" stroke-linecap="round" opacity="0.3"/>
+          <path d="M103,44 C111,40 120,39 129,43" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.45"/>
+        </svg>
+      </div>
+    </div>
+
+    <h2 id="instruction-text">Ready when you are</h2>
+    <p class="countdown" id="countdownText"></p>
+    <button id="startBreathe" class="begin-btn">▶ Begin</button>
+
+    <p class="sound-label">Ambient Sound</p>
+    <div class="sound-controls">
+      <button class="sound-btn" id="btnRain"   onclick="toggleSound('rain')">🌧️ Rain</button>
+      <button class="sound-btn" id="btnBirds"  onclick="toggleSound('birds')">🐦 Birds</button>
+      <button class="sound-btn" id="btnForest" onclick="toggleSound('forest')">🌲 Forest</button>
+      <button class="sound-btn" id="btnOff"    onclick="toggleSound('off')">🔇 Off</button>
+    </div>
+
+  </main>
+
+  <script>
+    const heart     = document.getElementById('breathingHeart');
+    const ring      = document.getElementById('breathingRing');
+    const ring2     = document.getElementById('breathingRing2');
+    const btn       = document.getElementById('startBreathe');
+    const text      = document.getElementById('instruction-text');
+    const countdown = document.getElementById('countdownText');
+
+    const phases = [
+      { label:'Inhale...', duration:4000, seconds:4, ringClass:'ring-inhale', ring2Class:'ring-2-inhale', textClass:'phase-inhale' },
+      { label:'Hold...',   duration:4000, seconds:4, ringClass:'ring-hold',   ring2Class:'ring-2-hold',   textClass:'phase-hold'   },
+      { label:'Exhale...', duration:4000, seconds:4, ringClass:'ring-exhale', ring2Class:'ring-2-exhale', textClass:'phase-exhale' },
+    ];
+
+    let running=false, phaseIndex=0, timer=null, countTimer=null;
+
+    function clearRingClasses() {
+      ring.classList.remove('ring-inhale','ring-hold','ring-exhale');
+      ring2.classList.remove('ring-2-inhale','ring-2-hold','ring-2-exhale');
+      text.classList.remove('phase-inhale','phase-hold','phase-exhale');
+    }
+
+    function startCountdown(seconds) {
+      let s = seconds;
+      countdown.textContent = s;
+      clearInterval(countTimer);
+      countTimer = setInterval(() => {
+        s--;
+        if (s <= 0) { clearInterval(countTimer); countdown.textContent = ''; }
+        else countdown.textContent = s;
+      }, 1000);
+    }
+
+    function runPhase() {
+      const phase = phases[phaseIndex];
+      clearRingClasses();
+      setTimeout(() => {
+        ring.classList.add(phase.ringClass);
+        ring2.classList.add(phase.ring2Class);
+      }, 50);
+      text.textContent = phase.label;
+      text.classList.add(phase.textClass);
+      startCountdown(phase.seconds);
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        phaseIndex = (phaseIndex + 1) % phases.length;
+        runPhase();
+      }, phase.duration);
+    }
+
+    btn.addEventListener('click', () => {
+      if (!running) {
+        running = true;
+        btn.textContent = '■ Stop';
+        heart.classList.add('heart-active');
+        phaseIndex = 0;
+        runPhase();
+      } else {
+        running = false;
+        btn.textContent = '▶ Begin';
+        heart.classList.remove('heart-active');
+        clearRingClasses();
+        text.textContent = 'Ready when you are';
+        text.className = '';
+        countdown.textContent = '';
+        clearTimeout(timer);
+        clearInterval(countTimer);
+      }
+    });
+
+    let audioCtx=null, soundNode=null, currentSound='off';
+
+    function getAudioCtx() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      return audioCtx;
+    }
+    function stopSound() {
+      if (soundNode) { try { soundNode.stop(); } catch(e) {} soundNode = null; }
+    }
+    function playRain() {
+      const ctx=getAudioCtx(), bufferSize=4096;
+      const node=ctx.createScriptProcessor(bufferSize,1,1);
+      node.onaudioprocess=(e)=>{ const o=e.outputBuffer.getChannelData(0); for(let i=0;i<bufferSize;i++) o[i]=(Math.random()*2-1)*0.08; };
+      const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=800;
+      node.connect(f); f.connect(ctx.destination);
+      node.start=()=>{}; node.stop=()=>{ node.disconnect(); f.disconnect(); };
+      return node;
+    }
+    function playBirds() {
+      const audio=new Audio('playBirds.mp3'); audio.loop=true; audio.volume=0.5;
+      audio.play().catch(e=>console.log('Birds:',e));
+      audio.stop=()=>{ audio.pause(); audio.currentTime=0; };
+      return audio;
+    }
+    function playForest() {
+      const ctx=getAudioCtx(), bufferSize=4096;
+      const node=ctx.createScriptProcessor(bufferSize,1,1);
+      let lastOut=0;
+      node.onaudioprocess=(e)=>{ const o=e.outputBuffer.getChannelData(0); for(let i=0;i<bufferSize;i++){ const w=Math.random()*2-1; lastOut=(lastOut+0.02*w)/1.02; o[i]=lastOut*3.5*0.15; } };
+      const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=400; f.Q.value=0.5;
+      node.connect(f); f.connect(ctx.destination);
+      node.start=()=>{}; node.stop=()=>{ node.disconnect(); f.disconnect(); };
+      return node;
+    }
+    function toggleSound(type) {
+      document.querySelectorAll('.sound-btn').forEach(b=>b.classList.remove('active'));
+      document.getElementById('btn'+type.charAt(0).toUpperCase()+type.slice(1))?.classList.add('active');
+      stopSound(); currentSound=type;
+      if(type==='rain')   soundNode=playRain();
+      if(type==='birds')  soundNode=playBirds();
+      if(type==='forest') soundNode=playForest();
+    }
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Solace | Journal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="bottomnav.css">
+  <style>
+    .entry-collapsed {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      cursor: pointer;
+    }
+    .entry-snippet {
+      font-size: 0.75rem;
+      color: #aaa;
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .entry-mood-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #555;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .chevron {
+      font-size: 0.85rem;
+      color: #bbb;
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+    .entry-expanded-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .entry-expanded-inner {
+      padding: 10px 0 4px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      margin-top: 8px;
+    }
+    .entry-expanded-date {
+      font-size: 0.7rem;
+      color: #aaa;
+      margin-bottom: 6px;
+    }
+    .entry-expanded-text {
+      font-size: 0.85rem;
+      color: #444;
+      line-height: 1.7;
+    }
+    .entry-expanded-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn-edit, .btn-delete {
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-delete:hover { background: #fff0f0; }
+    .btn-edit:hover { background: #f0f8f0; }
+    .see-more-btn {
+      background: none;
+      border: none;
+      color: #778E77;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 8px 0;
+      display: block;
+      width: 100%;
+      text-align: center;
+    }
+    .empty-state {
+      color: #aaa;
+      text-align: center;
+      font-style: italic;
+      padding: 20px 0;
+      font-size: 0.85rem;
+    }
+    .entry-card {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+    .entry-card:hover {
+      background: rgba(255,255,255,0.7);
+    }
+  </style>
+</head>
+<body class="journal-body">
+
+  <div class="journal-layout">
+
+    <!-- LEFT: Write form -->
+    <div class="progress-page-container">
+      <div class="glass-card journal-card">
+        <header class="journal-header">
+         <h1 id="journal-greeting" style="font-family:'Playfair Display',serif;font-size:clamp(1.6rem,5vw,2.4rem);color:#4a5a4a;font-weight:400;font-style:normal;"></h1>
+<p class="description">Take a deep breath and share what’s on your mind</p>
+        </header>
+        <div class="reflection-box">
+          <label>Today I feel...</label>
+          <textarea id="journal-input" placeholder="Today I feel..."></textarea>
+        </div>
+        <button class="save-btn" id="saveJournal">Save Entry</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Entries -->
+    <div class="journal-right">
+      <div class="recent-entries-section">
+        <h3>Recent Journal Entries</h3>
+        <div id="entriesList"></div>
+      </div>
+      <div class="recent-entries-section">
+        <h3>Mood History</h3>
+        <div id="moodEntriesList"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Delete Modal -->
+  <div id="deleteModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);justify-content:center;align-items:center;">
+    <div style="background:rgba(255,255,255,0.95);border-radius:24px;padding:32px 28px;width:min(90%,340px);box-shadow:0 20px 40px rgba(0,0,0,0.12);text-align:center;">
+      <div style="font-size:2rem;margin-bottom:12px;">🗑️</div>
+      <p style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#2F3E2F;margin-bottom:6px;">Delete this entry?</p>
+      <p style="font-family:'Montserrat',sans-serif;font-size:0.78rem;color:#aaa;margin-bottom:24px;">This action cannot be undone.</p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button id="cancelDelete" style="padding:10px 24px;border-radius:50px;border:none;background:#f5f5f5;color:#666;font-family:'Montserrat',sans-serif;font-weight:600;cursor:pointer;">Cancel</button>
+        <button id="confirmDelete" style="padding:10px 24px;border-radius:50px;border:none;background:linear-gradient(135deg,#FF7675,#D63031);color:white;font-family:'Montserrat',sans-serif;font-weight:600;cursor:pointer;">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var pendingDelete = null;
+    var journalShowAll = false;
+    var moodShowAll = false;
+    var PREVIEW_LIMIT = 3;
+
+    var moodEmojis = {
+      Joyful: '🤩', Calm: '😌', Okay: '🙂',
+      Meh: '😐', Sad: '😢', Angry: '😡', Anxious: '😰'
+    };
+
+    function toggleEntry(card) {
+      var panel = card.querySelector('.entry-expanded-panel');
+      var chevron = card.querySelector('.chevron');
+      var isOpen = card.classList.contains('expanded');
+
+      // Close all others
+      document.querySelectorAll('.entry-card.expanded').forEach(function(c) {
+        if (c !== card) {
+          c.classList.remove('expanded');
+          var p = c.querySelector('.entry-expanded-panel');
+          var ch = c.querySelector('.chevron');
+          if (p) p.style.maxHeight = '0px';
+          if (ch) ch.style.transform = 'rotate(0deg)';
+        }
+      });
+
+      if (isOpen) {
+        card.classList.remove('expanded');
+        if (panel) panel.style.maxHeight = '0px';
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+      } else {
+        card.classList.add('expanded');
+        if (panel) panel.style.maxHeight = '500px';
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+      }
+    }
+
+    function deleteEntry(index) {
+      pendingDelete = { type: 'journal', index: index };
+      document.getElementById('deleteModal').style.display = 'flex';
+    }
+
+    function deleteMoodEntry(index) {
+      pendingDelete = { type: 'mood', index: index };
+      document.getElementById('deleteModal').style.display = 'flex';
+    }
+
+    function editEntry(index) {
+      var entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+      document.getElementById('journal-input').value = entries[index].content;
+      window._editingIndex = index;
+      document.getElementById('saveJournal').textContent = '📝 Update Entry';
+      document.getElementById('journal-input').focus();
+      document.querySelector('.progress-page-container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function buildEntryCard(entry, i) {
+      var d = new Date(entry.date);
+      var dateShort = d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+      var timePart = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      var dateFull = dateShort + ', ' + timePart;
+      var plainText = entry.content.replace(/<[^>]*>/g, '');
+      var snippet = plainText.substring(0, 40) + (plainText.length > 40 ? '…' : '');
+      var fullText = entry.content.replace(/\n/g, '<br>');
+      var html = '';
+      html += '<div class="entry-card" onclick="toggleEntry(this)">';
+      html += '<div class="entry-collapsed">';
+      html += '<span class="entry-date">📅 ' + dateFull + '</span>';
+      html += '<span class="entry-snippet">' + snippet + '</span>';
+      html += '<span class="chevron">⌄</span>';
+      html += '</div>';
+      html += '<div class="entry-expanded-panel">';
+      html += '<div class="entry-expanded-inner">';
+      html += '<div class="entry-expanded-text">' + fullText + '</div>';
+      html += '<div class="entry-expanded-actions">';
+      html += '<button class="btn-edit" onclick="event.stopPropagation();editEntry(' + i + ')">✏️ Edit</button>';
+      html += '<button class="btn-delete" onclick="event.stopPropagation();deleteEntry(' + i + ')">🗑️ Delete</button>';
+      html += '</div>';
+      html += '</div>';
+      html += '</div>';
+      html += '</div>';
+      return html;
+    }
+
+    function buildMoodCard(entry, realIndex) {
+      var emoji = moodEmojis[entry.mood] || '😶';
+      var dateStr = new Date(entry.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+      var html = '';
+      html += '<div class="entry-card" onclick="toggleEntry(this)">';
+      html += '<div class="entry-collapsed">';
+      html += '<span style="font-size:1rem;flex-shrink:0;">' + emoji + '</span>';
+      html += '<span class="entry-date">' + dateStr + ' · ' + entry.time + '</span>';
+      html += '<span class="entry-mood-badge">' + entry.mood + '</span>';
+      html += '<span class="chevron">⌄</span>';
+      html += '</div>';
+      html += '<div class="entry-expanded-panel">';
+      html += '<div class="entry-expanded-inner">';
+      if (entry.note) {
+        html += '<div class="entry-expanded-text">💬 ' + entry.note + '</div>';
+      } else {
+        html += '<div class="entry-expanded-text" style="color:#ccc;font-style:italic;">No reflection added.</div>';
+      }
+      html += '<div class="entry-expanded-actions">';
+      html += '<button class="btn-delete" onclick="event.stopPropagation();deleteMoodEntry(' + realIndex + ')">🗑️ Delete</button>';
+      html += '</div>';
+      html += '</div>';
+      html += '</div>';
+      html += '</div>';
+      return html;
+    }
+
+    function renderEntries() {
+  var list = document.getElementById('entriesList');
+  
+  // Show skeleton first
+  list.innerHTML = `
+    <div class="skeleton"></div>
+    <div class="skeleton short"></div>
+    <div class="skeleton tall"></div>
+  `;
+
+  setTimeout(function() {
+    var entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+    if (entries.length === 0) {
+      list.innerHTML = '<div class="empty-state">No entries yet. Write your first one ✨</div>';
+      return;
+    }
+    var visible = journalShowAll ? entries : entries.slice(0, PREVIEW_LIMIT);
+    var html = '';
+    for (var i = 0; i < visible.length; i++) {
+      html += buildEntryCard(entries[i], i);
+    }
+    if (entries.length > PREVIEW_LIMIT) {
+      var remaining = entries.length - PREVIEW_LIMIT;
+      if (!journalShowAll) {
+        html += '<button class="see-more-btn" onclick="journalShowAll=true;renderEntries()">See ' + remaining + ' more ↓</button>';
+      } else {
+        html += '<button class="see-more-btn" onclick="journalShowAll=false;renderEntries()">Show less ↑</button>';
+      }
+    }
+    list.innerHTML = html;
+  }, 600);
+}
+
+function renderMoodEntries() {
+  var list = document.getElementById('moodEntriesList');
+
+  // Show skeleton first
+  list.innerHTML = `
+    <div class="skeleton"></div>
+    <div class="skeleton short"></div>
+    <div class="skeleton tall"></div>
+  `;
+
+  setTimeout(function() {
+    var moods = JSON.parse(localStorage.getItem('moodHistory')) || [];
+    if (moods.length === 0) {
+      list.innerHTML = '<div class="empty-state">No mood entries yet. Log your first mood ✨</div>';
+      return;
+    }
+    var reversed = moods.slice().reverse();
+    var visible = moodShowAll ? reversed : reversed.slice(0, PREVIEW_LIMIT);
+    var html = '';
+    for (var i = 0; i < visible.length; i++) {
+      var realIndex = moods.length - 1 - i;
+      html += buildMoodCard(reversed[i], realIndex);
+    }
+    if (reversed.length > PREVIEW_LIMIT) {
+      var remaining2 = reversed.length - PREVIEW_LIMIT;
+      if (!moodShowAll) {
+        html += '<button class="see-more-btn" onclick="moodShowAll=true;renderMoodEntries()">See ' + remaining2 + ' more ↓</button>';
+      } else {
+        html += '<button class="see-more-btn" onclick="moodShowAll=false;renderMoodEntries()">Show less ↑</button>';
+      }
+    }
+    list.innerHTML = html;
+  }, 600);
+}
+
+    function renderMoodEntries() {
+      var moods = JSON.parse(localStorage.getItem('moodHistory')) || [];
+      var list = document.getElementById('moodEntriesList');
+      if (moods.length === 0) {
+        list.innerHTML = '<div class="empty-state">No mood entries yet. Log your first mood ✨</div>';
+        return;
+      }
+      var reversed = moods.slice().reverse();
+      var visible = moodShowAll ? reversed : reversed.slice(0, PREVIEW_LIMIT);
+      var html = '';
+      for (var i = 0; i < visible.length; i++) {
+        var realIndex = moods.length - 1 - i;
+        html += buildMoodCard(reversed[i], realIndex);
+      }
+      if (reversed.length > PREVIEW_LIMIT) {
+        var remaining2 = reversed.length - PREVIEW_LIMIT;
+        if (!moodShowAll) {
+          html += '<button class="see-more-btn" onclick="moodShowAll=true;renderMoodEntries()">See ' + remaining2 + ' more ↓</button>';
+        } else {
+          html += '<button class="see-more-btn" onclick="moodShowAll=false;renderMoodEntries()">Show less ↑</button>';
+        }
+      }
+      list.innerHTML = html;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+ var userName = localStorage.getItem('user_name') || 'Friend';
+document.getElementById('journal-greeting').innerHTML = 'Hi, ' + userName + ' 🤍';
+  var journalInput = document.getElementById('journal-input');
+  var saveBtn = document.getElementById('saveJournal');
+
+  saveBtn.addEventListener('click', function() {
+    var content = journalInput.value.trim();
+    if (!content) return;
+    var entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+    if (window._editingIndex !== null && window._editingIndex !== undefined) {
+      entries[window._editingIndex].content = content;
+      window._editingIndex = null;
+      saveBtn.textContent = ' Save Entry';
+    } else {
+      entries.unshift({ date: new Date().toISOString(), content: content });
+    }
+    localStorage.setItem('journalEntries', JSON.stringify(entries));
+    journalInput.value = '';
+    renderEntries();
+   document.getElementById('savedModal').style.display = 'flex';
+  });
+      document.getElementById('confirmDelete').addEventListener('click', function() {
+        if (pendingDelete) {
+          if (pendingDelete.type === 'journal') {
+            var entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+            entries.splice(pendingDelete.index, 1);
+            localStorage.setItem('journalEntries', JSON.stringify(entries));
+            renderEntries();
+          } else {
+            var moods = JSON.parse(localStorage.getItem('moodHistory')) || [];
+            moods.splice(pendingDelete.index, 1);
+            localStorage.setItem('moodHistory', JSON.stringify(moods));
+            renderMoodEntries();
+          }
+          pendingDelete = null;
+          document.getElementById('deleteModal').style.display = 'none';
+        }
+      });
+
+      document.getElementById('cancelDelete').addEventListener('click', function() {
+        pendingDelete = null;
+        document.getElementById('deleteModal').style.display = 'none';
+      });
+
+      renderEntries();
+      renderMoodEntries();
+    });
+  </script>
+
+  <script src="script.js"></script>
+  <script>
+    /*function makeBubble() {
+      var b = document.createElement('div');
+      b.className = 'bubble';
+      var size = Math.random() * 60 + 15;
+      var duration = Math.random() * 12 + 8;
+      var colorDur = Math.random() * 8 + 6;
+      b.style.width = size + 'px';
+      b.style.height = size + 'px';
+      b.style.left = (Math.random() * 100) + '%';
+      b.style.bottom = '-' + size + 'px';
+      b.style.animationDuration = duration + 's, ' + colorDur + 's';
+      b.style.animationDelay = (Math.random() * 3) + 's, 0s';
+      document.body.appendChild(b);
+      setTimeout(function() { b.remove(); }, (duration + 4) * 1000);
+    }
+    for (var i = 0; i < 15; i++) setTimeout(makeBubble, i * 400);
+    setInterval(makeBubble, 1200);*/
+  </script>
+<div id="savedModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);justify-content:center;align-items:center;">
+  <div style="background:rgba(255,255,255,0.95);border-radius:24px;padding:32px 28px;width:min(90%,320px);text-align:center;">
+    <div style="font-size:2rem;margin-bottom:12px;"></div>
+    <p style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#2F3E2F;margin-bottom:6px;">Entry saved!</p>
+    <p style="font-family:'Montserrat',sans-serif;font-size:0.78rem;color:#aaa;margin-bottom:24px;">Your thoughts are safe here.</p>
+    <button onclick="document.getElementById('savedModal').style.display='none'" style="padding:10px 28px;border-radius:50px;border:none;background:linear-gradient(135deg,#55EFC4,#00B894);color:white;font-family:'Montserrat',sans-serif;font-weight:600;cursor:pointer;">Done</button>
+  </div>
+</div>
+</body>
+</html>

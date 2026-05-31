@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Solace | Gratitude</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="bottomnav.css">
+  <style>
+    .gratitude-body {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #AEE7FF 0%, #E8F9EE 100%);
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 100px;
+    }
+
+    .gratitude-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .gratitude-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: #2F3E2F;
+      margin-bottom: 6px;
+    }
+
+    .gratitude-header h1 span {
+      font-style: italic;
+      color: #8AA38A;
+    }
+
+    .gratitude-header p {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      color: #7A8B7A;
+      font-style: italic;
+    }
+
+    .prompt-card {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+      padding: 30px 24px;
+      margin-bottom: 20px;
+    }
+
+    .prompt-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #8AA38A;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .prompt-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: #2F3E2F;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      min-height: 60px;
+    }
+
+    .prompt-textarea {
+      width: 100%;
+      min-height: 120px;
+      border-radius: 16px;
+      border: 1.5px solid rgba(138,163,138,0.3);
+      background: rgba(255,255,255,0.5);
+      padding: 14px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      color: #2F3E2F;
+      outline: none;
+      resize: none;
+      transition: border 0.3s ease;
+    }
+
+    .prompt-textarea:focus {
+      border-color: #8AA38A;
+      background: rgba(255,255,255,0.8);
+    }
+
+    .prompt-textarea::placeholder {
+      color: #aaa;
+      font-style: italic;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .new-prompt-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1.5px solid rgba(138,163,138,0.4);
+      background: rgba(255,255,255,0.5);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #4a5a4a;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .new-prompt-btn:hover {
+      background: rgba(138,163,138,0.15);
+      border-color: #8AA38A;
+    }
+
+    .save-gratitude-btn {
+      flex: 2;
+      padding: 12px;
+      border-radius: 16px;
+      border: none;
+      background: linear-gradient(135deg, #8AA38A, #6a9a7a);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(138,163,138,0.4);
+    }
+
+    .save-gratitude-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(138,163,138,0.5);
+    }
+
+    /* Streak */
+    .streak-card {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(255,255,255,0.45);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.5);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .streak-emoji {
+      font-size: 2rem;
+    }
+
+    .streak-info label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #8AA38A;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .streak-info p {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: #2F3E2F;
+      margin: 2px 0 0;
+    }
+
+    /* Past entries */
+    .entries-section {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .entries-section h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: #2F3E2F;
+      margin-bottom: 14px;
+    }
+
+    .gratitude-entry-card {
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.5);
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+
+    .gratitude-entry-card .entry-date {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.72rem;
+      color: #aaa;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .gratitude-entry-card .entry-prompt {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.9rem;
+      color: #8AA38A;
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+
+    .gratitude-entry-card .entry-answer {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    .delete-gratitude-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      opacity: 0.5;
+      float: right;
+      transition: opacity 0.2s;
+    }
+
+    .delete-gratitude-btn:hover { opacity: 1; }
+
+    .empty-msg {
+      text-align: center;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      color: #aaa;
+      font-style: italic;
+      padding: 20px 0;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #2F3E2F;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.4s ease;
+      z-index: 9999;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body class="gratitude-body">
+
+  <div style="width:100%;max-width:500px;margin-bottom:16px;">
+    <a href="activities.html" class="back-link-journal">
+      <span class="back-arrow">←</span> Activities
+    </a>
+  </div>
+
+  <div class="gratitude-header">
+    <h1>Daily <span>Gratitude</span> 🌸</h1>
+    <p>A moment to notice what's good.</p>
+  </div>
+
+  <!-- Streak -->
+  <div class="streak-card">
+    <div class="streak-emoji">🔥</div>
+    <div class="streak-info">
+      <label>Current Streak</label>
+      <p id="streakText">0 days</p>
+    </div>
+  </div>
+
+  <!-- Prompt Card -->
+  <div class="prompt-card">
+    <span class="prompt-label">Today's Prompt</span>
+    <p class="prompt-text" id="promptText"></p>
+    <textarea class="prompt-textarea" id="gratitudeInput"
+      placeholder="Write your answer here..."></textarea>
+    <div class="btn-row">
+      <button class="new-prompt-btn" onclick="newPrompt()">🔀 New Prompt</button>
+      <button class="save-gratitude-btn" onclick="saveEntry()">💾 Save</button>
+    </div>
+  </div>
+
+  <!-- Past Entries -->
+  <div class="entries-section">
+    <h3>Past Entries</h3>
+    <div id="gratitudeList"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const prompts = [
+      "What made you smile today?",
+      "Name three things you're grateful for right now.",
+      "Who in your life are you most thankful for, and why?",
+      "What's a small moment from today that brought you joy?",
+      "What's something about your body you're grateful for?",
+      "What challenge are you grateful for because it helped you grow?",
+      "What's a place that makes you feel at peace?",
+      "What's something you often take for granted?",
+      "What's a skill or talent you're proud of?",
+      "What made today better than yesterday?",
+      "What's a memory that always makes you happy?",
+      "What's something beautiful you noticed today?",
+      "Who has been kind to you recently?",
+      "What's one thing you love about where you live?",
+      "What simple pleasure are you grateful for today?",
+      "What's something you're looking forward to?",
+      "What's a lesson you learned recently that you're grateful for?",
+      "What's one thing that went right today?",
+      "What do you love most about yourself today?",
+      "What's a gift in your life you didn't ask for but are glad you have?"
+    ];
+
+    let currentPrompt = '';
+
+    function newPrompt() {
+      const pool = prompts.filter(p => p !== currentPrompt);
+      currentPrompt = pool[Math.floor(Math.random() * pool.length)];
+      const el = document.getElementById('promptText');
+      el.style.opacity = 0;
+      setTimeout(() => {
+        el.textContent = currentPrompt;
+        el.style.transition = 'opacity 0.4s ease';
+        el.style.opacity = 1;
+      }, 200);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function saveEntry() {
+      const answer = document.getElementById('gratitudeInput').value.trim();
+      if (!answer) { showToast('Write something first 🌸'); return; }
+
+      let entries = JSON.parse(localStorage.getItem('gratitudeEntries')) || [];
+      entries.unshift({
+        prompt: currentPrompt,
+        answer,
+        date: new Date().toISOString()
+      });
+      localStorage.setItem('gratitudeEntries', JSON.stringify(entries));
+      localStorage.setItem('gratitudeLastDate', new Date().toDateString());
+
+      document.getElementById('gratitudeInput').value = '';
+      updateStreak();
+      renderEntries();
+      showToast('Saved! 🌸 Keep going.');
+      newPrompt();
+    }
+
+    function updateStreak() {
+      let entries = JSON.parse(localStorage.getItem('gratitudeEntries')) || [];
+      if (entries.length === 0) {
+        document.getElementById('streakText').textContent = '0 days';
+        return;
+      }
+
+      // Count consecutive days
+      const dates = [...new Set(entries.map(e =>
+        new Date(e.date).toDateString()
+      ))].sort((a, b) => new Date(b) - new Date(a));
+
+      let streak = 1;
+      for (let i = 1; i < dates.length; i++) {
+        const diff = (new Date(dates[i-1]) - new Date(dates[i])) / (1000*60*60*24);
+        if (diff === 1) streak++;
+        else break;
+      }
+
+      document.getElementById('streakText').textContent =
+        streak === 1 ? '1 day 🌱' :
+        streak < 7  ? `${streak} days 🌿` :
+        streak < 14 ? `${streak} days 🌳` : `${streak} days 🏆`;
+    }
+
+    function renderEntries() {
+      const entries = JSON.parse(localStorage.getItem('gratitudeEntries')) || [];
+      const list = document.getElementById('gratitudeList');
+
+      if (entries.length === 0) {
+        list.innerHTML = '<p class="empty-msg">No entries yet. Answer your first prompt above ✨</p>';
+        return;
+      }
+
+      list.innerHTML = entries.map((e, i) => `
+        <div class="gratitude-entry-card">
+          <button class="delete-gratitude-btn" onclick="deleteEntry(${i})">🗑️</button>
+          <span class="entry-date">${new Date(e.date).toLocaleDateString('en-US', { dateStyle: 'medium' })}</span>
+          <p class="entry-prompt">"${e.prompt}"</p>
+          <p class="entry-answer">${e.answer}</p>
+        </div>
+      `).join('');
+    }
+
+    function deleteEntry(index) {
+      if (confirm('Delete this entry?')) {
+        let entries = JSON.parse(localStorage.getItem('gratitudeEntries')) || [];
+        entries.splice(index, 1);
+        localStorage.setItem('gratitudeEntries', JSON.stringify(entries));
+        renderEntries();
+        updateStreak();
+      }
+    }
+
+    // Init
+    newPrompt();
+    updateStreak();
+    renderEntries();
+  </script>
+
+  <script src="script.js"></script>
+  <script>
+    function makeBubble() {
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      const size = Math.random() * 60 + 15;
+      const duration = Math.random() * 12 + 8;
+      const colorDur = Math.random() * 8 + 6;
+      b.style.width = size + 'px';
+      b.style.height = size + 'px';
+      b.style.left = (Math.random() * 100) + '%';
+      b.style.bottom = '-' + size + 'px';
+      b.style.animationDuration = duration + 's, ' + colorDur + 's';
+      b.style.animationDelay = (Math.random() * 3) + 's, 0s';
+      document.body.appendChild(b);
+      setTimeout(() => b.remove(), (duration + 4) * 1000);
+    }
+    for (let i = 0; i < 15; i++) setTimeout(makeBubble, i * 400);
+    setInterval(makeBubble, 1200);
+  </script>
+</body>
+</html>
